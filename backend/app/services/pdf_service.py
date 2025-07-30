@@ -1,7 +1,8 @@
-import pdfplumber
+import logging
 from io import BytesIO
 from typing import Tuple, Dict
-import logging
+
+import pdfplumber
 
 logger = logging.getLogger(__name__)
 
