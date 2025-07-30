@@ -94,3 +94,30 @@ async def get_history():
     except Exception as e:
         logger.error(f"Error retrieving document history: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Error retrieving history: {str(e)}")
+
+
+@router.get("/{doc_id}")
+async def get_document(doc_id: str):
+    """Retrieve the full document by ID"""
+    try:
+        document = db_service.get_document_by_id(doc_id)
+
+        if not document:
+            raise HTTPException(status_code=404, detail="Document not found")
+
+        return APIResponse(
+            success=True,
+            message="Document found",
+            data={
+                "id": document.id,
+                "filename": document.filename,
+                "summary": document.summary,
+                "upload_date": document.upload_date.isoformat(),
+            },
+        )
+
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        logger.error(f"Error retrieving document {doc_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error retrieving document: {str(e)}")
