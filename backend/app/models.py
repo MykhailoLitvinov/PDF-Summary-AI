@@ -1,5 +1,6 @@
 import uuid
 from datetime import datetime
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -21,3 +22,9 @@ class DocumentHistory(BaseModel):
     filename: str
     summary: str
     upload_date: datetime
+
+
+class APIResponse(BaseModel):
+    success: bool
+    message: str
+    data: Optional[dict] = None
