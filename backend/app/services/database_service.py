@@ -10,10 +10,10 @@ logger = logging.getLogger(__name__)
 
 
 class DatabaseService:
-    def __init__(self, db_path: str = "data/documents.db"):
-        self.db_path = db_path
+    def __init__(self):
+        self.db_path = os.getenv("DATABASE_PATH")
         # Create the folder if it doesn't exist
-        os.makedirs(os.path.dirname(db_path), exist_ok=True)
+        os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         self._init_db()
 
     def _init_db(self):
@@ -110,8 +110,6 @@ class DatabaseService:
                     return DocumentHistory(
                         id=row[0], filename=row[1], summary=row[2], upload_date=datetime.fromisoformat(row[3])
                     )
-                return None
 
         except Exception as e:
             logger.error(f"Error retrieving document: {str(e)}")
-            return None
