@@ -60,4 +60,5 @@ def mock_openai_client():
 def test_client():
     """Fixture that provides a FastAPI test client"""
     from app.main import app
+
     return TestClient(app)
