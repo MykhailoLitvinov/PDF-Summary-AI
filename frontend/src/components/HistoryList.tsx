@@ -4,9 +4,10 @@ import { Calendar, FileText, HardDrive, Hash } from 'lucide-react';
 
 interface HistoryListProps {
   documents: DocumentHistory[];
+  onDocumentSelect: (documentId: string) => void;
 }
 
-const HistoryList: React.FC<HistoryListProps> = ({ documents }) => {
+const HistoryList: React.FC<HistoryListProps> = ({ documents, onDocumentSelect }) => {
   const formatFileSize = (bytes: number): string => {
     if (bytes === 0) return '0 Bytes';
     const k = 1024;
@@ -40,12 +41,15 @@ const HistoryList: React.FC<HistoryListProps> = ({ documents }) => {
         {documents.map((doc) => (
           <div
             key={doc.id}
-            className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
+            onClick={() => onDocumentSelect(doc.id)}
+            className="border border-gray-200 rounded-lg p-4 hover:shadow-md hover:border-blue-300 transition-all cursor-pointer group"
           >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-3">
               <div className="flex items-center mb-2 sm:mb-0">
-                <FileText className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0" />
-                <h3 className="font-medium text-gray-800 truncate">{doc.filename}</h3>
+                <FileText className="h-5 w-5 text-blue-500 mr-2 flex-shrink-0 group-hover:text-blue-600 transition-colors" />
+                <h3 className="font-medium text-gray-800 truncate group-hover:text-blue-800 transition-colors">
+                  {doc.filename}
+                </h3>
               </div>
 
               <div className="flex flex-wrap gap-3 text-xs text-gray-500">
@@ -66,8 +70,12 @@ const HistoryList: React.FC<HistoryListProps> = ({ documents }) => {
               </div>
             </div>
 
-            <div className="text-sm text-gray-600 bg-gray-50 rounded p-3">
+            <div className="text-sm text-gray-600 bg-gray-50 rounded p-3 group-hover:bg-blue-50 transition-colors">
               <p className="line-clamp-3">{doc.summary}</p>
+            </div>
+
+            <div className="mt-2 text-xs text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+              Click to view full details
             </div>
           </div>
         ))}

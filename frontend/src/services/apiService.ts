@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { APIResponse, UploadResponse, HistoryResponse } from '../types';
+import { APIResponse, UploadResponse, HistoryResponse, DocumentSummary } from '../types';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:8000';
 
@@ -87,6 +87,26 @@ export const apiService = {
         throw new Error(error.message);
       } else {
         throw new Error('Unknown error while retrieving history');
+      }
+    }
+  },
+
+  getDocumentById: async (id: string): Promise<DocumentSummary> => {
+    try {
+      const response = await apiClient.get<APIResponse<DocumentSummary>>(`/api/documents/${id}`);
+
+      if (response.data.success && response.data.data) {
+        return response.data.data;
+      } else {
+        throw new Error(response.data.message || 'Failed to retrieve document');
+      }
+    } catch (error: any) {
+      if (error.response?.data?.detail) {
+        throw new Error(error.response.data.detail);
+      } else if (error.message) {
+        throw new Error(error.message);
+      } else {
+        throw new Error('Unknown error while retrieving document');
       }
     }
   },

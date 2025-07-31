@@ -18,6 +18,8 @@ function App() {
   const [history, setHistory] = useState<DocumentHistory[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isBackendAvailable, setIsBackendAvailable] = useState<boolean | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<DocumentSummary | null>(null);
+  const [isLoadingDocument, setIsLoadingDocument] = useState(false);
 
   // Check backend availability on load
   useEffect(() => {
@@ -47,6 +49,9 @@ function App() {
   };
 
   const handleFileSelect = async (file: File) => {
+    // Clear selected document when uploading new file
+    setSelectedDocument(null);
+
     setUploadState({
       isUploading: true,
       progress: 0,
@@ -79,6 +84,22 @@ function App() {
     }
   };
 
+  const handleDocumentSelect = async (documentId: string) => {
+    // Clear upload result when selecting from history
+    setUploadState(prev => ({ ...prev, result: null }));
+
+    setIsLoadingDocument(true);
+    try {
+      const document = await apiService.getDocumentById(documentId);
+      setSelectedDocument(document);
+    } catch (error: any) {
+      console.error('Failed to load document:', error);
+      // You might want to show an error message to user here
+    } finally {
+      setIsLoadingDocument(false);
+    }
+  };
+
   const resetUpload = () => {
     setUploadState({
       isUploading: false,
@@ -86,6 +107,7 @@ function App() {
       error: null,
       result: null
     });
+    setSelectedDocument(null);
   };
 
   // Show error if backend is unavailable
@@ -176,15 +198,28 @@ function App() {
                   <LoadingSpinner message="Loading history..." />
                 </div>
               ) : (
-                <HistoryList documents={history} />
+                <HistoryList
+                  documents={history}
+                  onDocumentSelect={handleDocumentSelect}
+                />
               )}
             </div>
           </div>
 
           {/* Right Column - Result */}
           <div>
-            {uploadState.result && (
+            {isLoadingDocument && (
+              <div className="bg-white rounded-lg shadow-lg p-6">
+                <LoadingSpinner message="Loading document..." />
+              </div>
+            )}
+
+            {uploadState.result && !isLoadingDocument && (
               <SummaryDisplay document={uploadState.result} />
+            )}
+
+            {selectedDocument && !uploadState.result && !isLoadingDocument && (
+              <SummaryDisplay document={selectedDocument} />
             )}
           </div>
         </div>
