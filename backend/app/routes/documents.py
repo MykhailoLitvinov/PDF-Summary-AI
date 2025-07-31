@@ -43,7 +43,12 @@ async def upload_pdf(file: UploadFile = File(...)):
         summary = openai_service.generate_summary(extracted_data["text"])
 
         # Create document object
-        document = DocumentSummary(filename=file.filename, summary=summary)
+        document = DocumentSummary(
+            filename=file.filename,
+            summary=summary,
+            file_size=len(file_content),
+            page_count=extracted_data["page_count"],
+        )
 
         # Save to the database
         if not db_service.save_document_summary(document):
@@ -59,6 +64,8 @@ async def upload_pdf(file: UploadFile = File(...)):
                 "filename": document.filename,
                 "summary": document.summary,
                 "upload_date": document.upload_date.isoformat(),
+                "file_size": document.file_size,
+                "page_count": document.page_count,
             },
         )
 
@@ -85,6 +92,8 @@ async def get_history():
                         "filename": doc.filename,
                         "summary": doc.summary[:200] + "..." if len(doc.summary) > 200 else doc.summary,
                         "upload_date": doc.upload_date.isoformat(),
+                        "file_size": doc.file_size,
+                        "page_count": doc.page_count,
                     }
                     for doc in documents
                 ]
@@ -113,6 +122,8 @@ async def get_document(doc_id: str):
                 "filename": document.filename,
                 "summary": document.summary,
                 "upload_date": document.upload_date.isoformat(),
+                "file_size": document.file_size,
+                "page_count": document.page_count,
             },
         )
 

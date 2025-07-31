@@ -27,7 +27,9 @@ class DatabaseService:
                         id TEXT PRIMARY KEY,
                         filename TEXT NOT NULL,
                         summary TEXT NOT NULL,
-                        upload_date TEXT NOT NULL
+                        upload_date TEXT NOT NULL,
+                        file_size INTEGER NOT NULL,
+                        page_count INTEGER NOT NULL
                     )
                 """
                 )
@@ -44,14 +46,16 @@ class DatabaseService:
                 cursor = conn.cursor()
                 cursor.execute(
                     """
-                    INSERT INTO documents (id, filename, summary, upload_date)
-                    VALUES (?, ?, ?, ?)
+                    INSERT INTO documents (id, filename, summary, upload_date, file_size, page_count)
+                    VALUES (?, ?, ?, ?, ?, ?)
                 """,
                     (
                         document.id,
                         document.filename,
                         document.summary,
                         document.upload_date.isoformat(),
+                        document.file_size,
+                        document.page_count,
                     ),
                 )
                 conn.commit()
@@ -68,7 +72,7 @@ class DatabaseService:
                 cursor = conn.cursor()
                 cursor.execute(
                     """
-                    SELECT id, filename, summary, upload_date
+                    SELECT id, filename, summary, upload_date, file_size, page_count
                     FROM documents
                     ORDER BY upload_date DESC
                     LIMIT 5
@@ -80,7 +84,12 @@ class DatabaseService:
 
                 for row in rows:
                     doc = DocumentHistory(
-                        id=row[0], filename=row[1], summary=row[2], upload_date=datetime.fromisoformat(row[3])
+                        id=row[0],
+                        filename=row[1],
+                        summary=row[2],
+                        upload_date=datetime.fromisoformat(row[3]),
+                        file_size=row[4],
+                        page_count=row[5],
                     )
                     documents.append(doc)
 
@@ -98,7 +107,7 @@ class DatabaseService:
                 cursor = conn.cursor()
                 cursor.execute(
                     """
-                    SELECT id, filename, summary, upload_date
+                    SELECT id, filename, summary, upload_date, file_size, page_count
                     FROM documents
                     WHERE id = ?
                 """,
@@ -108,7 +117,12 @@ class DatabaseService:
                 row = cursor.fetchone()
                 if row:
                     return DocumentHistory(
-                        id=row[0], filename=row[1], summary=row[2], upload_date=datetime.fromisoformat(row[3])
+                        id=row[0],
+                        filename=row[1],
+                        summary=row[2],
+                        upload_date=datetime.fromisoformat(row[3]),
+                        file_size=row[4],
+                        page_count=row[5],
                     )
 
         except Exception as e:

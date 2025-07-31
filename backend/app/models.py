@@ -15,6 +15,8 @@ class DocumentSummary(BaseModel):
     filename: str
     summary: str
     upload_date: datetime = Field(default_factory=datetime.now)
+    file_size: int
+    page_count: int
 
 
 class DocumentHistory(BaseModel):
@@ -22,7 +24,8 @@ class DocumentHistory(BaseModel):
     filename: str
     summary: str
     upload_date: datetime
-
+    file_size: int
+    page_count: int
 
 class APIResponse(BaseModel):
     success: bool

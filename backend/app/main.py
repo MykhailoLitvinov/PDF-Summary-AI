@@ -23,6 +23,7 @@ app = FastAPI(
 # Configure CORS
 app.add_middleware(
     CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -36,6 +37,12 @@ app.include_router(documents_router)
 async def root():
     """Root endpoint"""
     return {"message": "PDF Summary AI Backend", "version": "1.0.0", "status": "running"}
+
+
+@app.get("/health")
+async def health():
+    """Health check endpoint"""
+    return {"status": "healthy", "service": "pdf-summary-ai"}
 
 
 # Global error handler
