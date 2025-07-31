@@ -27,6 +27,7 @@ class DocumentHistory(BaseModel):
     file_size: int
     page_count: int
 
+
 class APIResponse(BaseModel):
     success: bool
     message: str

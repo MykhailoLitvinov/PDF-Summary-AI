@@ -30,7 +30,7 @@ async def upload_pdf(file: UploadFile = File(...)):
 
         # Extract text from the PDF
         logger.info("Extracting text from PDF...")
-        extracted_data = pdf_service.extract_text_with_tables(file_content)
+        extracted_data = pdf_service.extract_pdf_content(file_content)
 
         if not extracted_data["text"].strip():
             raise HTTPException(
@@ -40,7 +40,8 @@ async def upload_pdf(file: UploadFile = File(...)):
 
         # Generate summary using OpenAI
         logger.info("Generating summary with OpenAI...")
-        summary = openai_service.generate_summary(extracted_data["text"])
+
+        summary = openai_service.generate_summary(extracted_data["text"], extracted_data["images"])
 
         # Create document object
         document = DocumentSummary(

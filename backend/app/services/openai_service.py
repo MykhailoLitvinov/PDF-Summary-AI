@@ -17,17 +17,30 @@ class OpenAIService:
 
         self.client = openai.OpenAI(api_key=self.api_key)
 
-    def generate_summary(self, text: str) -> str:
+    def generate_summary(self, text: str, images: list[dict]) -> str:
         """Generate a summary of the document"""
         try:
-            developer_prompt = """You are expert at summarization of the input text. Your goal is to provide a concise and informative summary of the provided document."""
-
+            developer_prompt = """
+            You are expert at summarization of the pdf file content. 
+            Your goal is to provide a concise and informative summary of the document based on the text, tables and images input.
+            """
+            messages = [
+                {"role": "developer", "content": developer_prompt},
+                {"role": "user", "content": f"Document to summarize:\n\n{text}"},
+            ]
+            for image in images:
+                messages.append(
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": f"Image {image["image_num"]} from page {image["page"]}"},
+                            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image["base64"]}"}},
+                        ],
+                    }
+                )
             response = self.client.chat.completions.create(
-                model="gpt-3.5-turbo",
-                messages=[
-                    {"role": "developer", "content": developer_prompt},
-                    {"role": "user", "content": f"Document to summarize:\n\n{text}"},
-                ],
+                model="gpt-4o",
+                messages=messages,
                 max_tokens=500,
                 temperature=0.3,
             )

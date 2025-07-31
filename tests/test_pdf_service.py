@@ -9,12 +9,12 @@ def test_validate_pdf_success(load_pdf_bytes):
     assert message == "OK"
 
 
-def test_extract_text_with_tables(load_pdf_bytes):
+def test_extract_text_dummy(load_pdf_bytes):
     filename = "dummy.pdf"
     pdf_bytes = load_pdf_bytes(filename)
     service = PDFService()
 
-    result = service.extract_text_with_tables(pdf_bytes)
+    result = service.extract_pdf_content(pdf_bytes)
 
     assert "text" in result
     assert "tables" in result
@@ -23,3 +23,18 @@ def test_extract_text_with_tables(load_pdf_bytes):
 
     assert result["page_count"] > 0
     assert "Dummy PDF file" in result["text"]
+
+
+def test_extract_text_image_table(load_pdf_bytes):
+    filename = "sample.pdf"
+    pdf_bytes = load_pdf_bytes(filename)
+    service = PDFService()
+
+    result = service.extract_pdf_content(pdf_bytes)
+
+    assert len(result["tables"]) > 0
+    assert "data" in result["tables"][0]
+    assert isinstance(result["tables"][0]["data"], list)
+
+    assert len(result["images"]) > 0
+    assert "base64" in result["images"][0]

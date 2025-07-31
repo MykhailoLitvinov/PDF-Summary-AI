@@ -1,3 +1,4 @@
+import base64
 import logging
 from io import BytesIO
 from typing import Tuple, Dict
@@ -42,13 +43,12 @@ class PDFService:
             logger.error(f"PDF validation error: {str(e)}")
             return False, f"Failed to read PDF file: {str(e)}"
 
-    def extract_text_with_tables(self, file_content: bytes) -> Dict[str, any]:
+    def extract_pdf_content(self, file_content: bytes) -> Dict[str, any]:
         """Extract text from PDF, including tables"""
         try:
             pdf_stream = BytesIO(file_content)
-            extracted_data = {"text": "", "tables": [], "page_count": 0, "metadata": {}}
+            extracted_data = {"text": "", "tables": [], "images": [], "page_count": 0, "metadata": {}}
 
-            # Use pdfplumber for better table extraction
             with pdfplumber.open(pdf_stream) as pdf:
                 extracted_data["page_count"] = len(pdf.pages)
 
@@ -78,6 +78,23 @@ class PDFService:
                             # Append table as text
                             table_text = self._table_to_text(table)
                             all_text.append(f"=== Table {table_num} on page {page_num} ===\n{table_text}\n")
+
+                    # Extract images
+                    images = page.images
+                    if images:
+                        for img_index, img in enumerate(images, 1):
+                            # Crop image region
+                            cropped = page.crop((img["x0"], img["top"], img["x1"], img["bottom"]))
+                            pil_img = cropped.to_image(resolution=300).original
+
+                            # Convert to base64
+                            img_byte_arr = BytesIO()
+                            pil_img.save(img_byte_arr, format="PNG")
+                            img_base64 = base64.b64encode(img_byte_arr.getvalue()).decode("utf-8")
+
+                            extracted_data["images"].append(
+                                {"page": page_num, "image_num": img_index, "base64": img_base64}
+                            )
 
                 extracted_data["text"] = "\n".join(all_text)
 
