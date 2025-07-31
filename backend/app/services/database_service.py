@@ -12,6 +12,8 @@ logger = logging.getLogger(__name__)
 class DatabaseService:
     def __init__(self):
         self.db_path = os.getenv("DATABASE_PATH")
+        if not self.db_path:
+            raise ValueError("DATABASE_PATH environment variable is required")
         # Create the folder if it doesn't exist
         os.makedirs(os.path.dirname(self.db_path), exist_ok=True)
         self._init_db()
@@ -127,3 +129,4 @@ class DatabaseService:
 
         except Exception as e:
             logger.error(f"Error retrieving document: {str(e)}")
+            return None

@@ -1,4 +1,5 @@
 import logging
+import os
 
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
@@ -21,9 +22,12 @@ app = FastAPI(
 )
 
 # Configure CORS
+cors_origins = [
+    origin.strip() for origin in os.getenv("CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000").split(",")
+]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -49,6 +53,4 @@ async def health():
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
     logger.error(f"Global error: {str(exc)}")
-    return JSONResponse(
-        status_code=500, content={"success": False, "message": "Internal server error", "detail": str(exc)}
-    )
+    return JSONResponse(status_code=500, content={"success": False, "message": "Internal server error"})

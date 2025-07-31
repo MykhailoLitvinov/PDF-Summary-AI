@@ -1,5 +1,6 @@
 import base64
 import logging
+import os
 from io import BytesIO
 from typing import Tuple, Dict
 
@@ -9,11 +10,9 @@ logger = logging.getLogger(__name__)
 
 
 class PDFService:
-    MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
-    MAX_PAGES = 100
-
     def __init__(self):
-        pass
+        self.MAX_FILE_SIZE = int(os.getenv("PDF_MAX_FILE_SIZE", "52428800"))  # 50MB default
+        self.MAX_PAGES = int(os.getenv("PDF_MAX_PAGES", "100"))  # 100 pages default
 
     def validate_pdf(self, file_content: bytes, filename: str) -> Tuple[bool, str]:
         """Validate PDF file"""
@@ -25,6 +24,10 @@ class PDFService:
             # Check if it's a PDF file
             if not filename.lower().endswith(".pdf"):
                 return False, "Only PDF files are supported"
+
+            # Check PDF file signature
+            if not file_content.startswith(b"%PDF-"):
+                return False, "Invalid PDF file format"
 
             # Check if the file is readable
             pdf_stream = BytesIO(file_content)
@@ -41,7 +44,7 @@ class PDFService:
 
         except Exception as e:
             logger.error(f"PDF validation error: {str(e)}")
-            return False, f"Failed to read PDF file: {str(e)}"
+            return False, "Failed to read PDF file"
 
     def extract_pdf_content(self, file_content: bytes) -> Dict[str, any]:
         """Extract text from PDF, including tables"""
@@ -89,12 +92,16 @@ class PDFService:
 
                             # Convert to base64
                             img_byte_arr = BytesIO()
-                            pil_img.save(img_byte_arr, format="PNG")
-                            img_base64 = base64.b64encode(img_byte_arr.getvalue()).decode("utf-8")
+                            try:
+                                pil_img.save(img_byte_arr, format="PNG")
+                                img_base64 = base64.b64encode(img_byte_arr.getvalue()).decode("utf-8")
 
-                            extracted_data["images"].append(
-                                {"page": page_num, "image_num": img_index, "base64": img_base64}
-                            )
+                                extracted_data["images"].append(
+                                    {"page": page_num, "image_num": img_index, "base64": img_base64}
+                                )
+                            finally:
+                                img_byte_arr.close()
+                                pil_img.close()
 
                 extracted_data["text"] = "\n".join(all_text)
 

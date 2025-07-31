@@ -74,7 +74,7 @@ async def upload_pdf(file: UploadFile = File(...)):
         raise e
     except Exception as e:
         logger.error(f"Error processing file {file.filename}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error processing file: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error processing file")
 
 
 @router.get("/history")
@@ -103,7 +103,7 @@ async def get_history():
 
     except Exception as e:
         logger.error(f"Error retrieving document history: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error retrieving history: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error retrieving history")
 
 
 @router.get("/{doc_id}")
@@ -132,4 +132,4 @@ async def get_document(doc_id: str):
         raise e
     except Exception as e:
         logger.error(f"Error retrieving document {doc_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Error retrieving document: {str(e)}")
+        raise HTTPException(status_code=500, detail="Error retrieving document")
