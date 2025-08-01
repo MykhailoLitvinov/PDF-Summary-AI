@@ -168,3 +168,20 @@ def test_extract_content_real_file(load_pdf_bytes):
     assert len(result["images"]) > 0
 
     assert "base64" in result["images"][0]
+
+
+def test_extract_content_large_file(load_pdf_bytes):
+    """Integration test with real large PDF"""
+    filename = "large_sample.pdf"
+    pdf_bytes = load_pdf_bytes(filename)
+    service = PDFService()
+
+    result = service.extract_pdf_content(pdf_bytes)
+
+    assert "text" in result
+    assert "tables" in result
+    assert "images" in result
+
+    assert len(result["text"]) > 0
+    assert len(result["tables"]) > 0
+    assert len(result["images"]) > 0

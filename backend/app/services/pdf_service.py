@@ -84,8 +84,11 @@ class PDFService:
 
                     # Extract images
                     images = page.images
+                    on_page_im = 0  # some files may have more than LIMIT images on page
                     if images and len(extracted_data["images"]) < self.MAX_IMAGES:
                         for img_index, img in enumerate(images, 1):
+                            if on_page_im == self.MAX_IMAGES:
+                                break
                             # Crop image region
                             cropped = page.crop((img["x0"], img["top"], img["x1"], img["bottom"]))
                             pil_img = cropped.to_image(resolution=300).original
@@ -99,6 +102,7 @@ class PDFService:
                                 extracted_data["images"].append(
                                     {"page": page_num, "image_num": img_index, "base64": img_base64}
                                 )
+                                on_page_im += 1
                             finally:
                                 img_byte_arr.close()
                                 pil_img.close()

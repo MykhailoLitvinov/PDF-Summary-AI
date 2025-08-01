@@ -24,25 +24,23 @@ class OpenAIService:
             You are expert at summarization of the pdf file content. 
             Your goal is to provide a concise and informative summary of the document based on the text, tables and images input.
             """
+            content = [
+                {"type": "text", "text": f"Document to summarize:\n\n{text}"},
+                *(
+                    {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image["base64"]}"}}
+                    for image in images
+                ),
+            ]
             messages = [
                 {"role": "developer", "content": developer_prompt},
-                {"role": "user", "content": f"Document to summarize:\n\n{text}"},
+                {"role": "user", "content": content},
             ]
-            for image in images:
-                messages.append(
-                    {
-                        "role": "user",
-                        "content": [
-                            {"type": "text", "text": f"Image {image["image_num"]} from page {image["page"]}"},
-                            {"type": "image_url", "image_url": {"url": f"data:image/png;base64,{image["base64"]}"}},
-                        ],
-                    }
-                )
+
             response = self.client.chat.completions.create(
-                model="gpt-4o",
+                model="gpt-4o-2024-11-20",
                 messages=messages,
-                max_tokens=500,
-                temperature=0.3,
+                max_tokens=1000,
+                temperature=0.1,
             )
 
             summary = response.choices[0].message.content.strip()
