@@ -50,10 +50,6 @@ DATABASE_PATH=./data/documents.db
 
 # Optional - API Configuration
 CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
-
-# Optional - PDF Processing Limits
-PDF_MAX_FILE_SIZE=52428800  # 50MB in bytes
-PDF_MAX_PAGES=100           # Maximum pages per PDF
 ```
 
 ## Quick Start

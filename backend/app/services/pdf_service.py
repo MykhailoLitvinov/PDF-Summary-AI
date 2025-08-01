@@ -1,6 +1,5 @@
 import base64
 import logging
-import os
 from io import BytesIO
 from typing import Tuple, Dict
 
@@ -11,8 +10,9 @@ logger = logging.getLogger(__name__)
 
 class PDFService:
     def __init__(self):
-        self.MAX_FILE_SIZE = int(os.getenv("PDF_MAX_FILE_SIZE", "52428800"))  # 50MB default
-        self.MAX_PAGES = int(os.getenv("PDF_MAX_PAGES", "100"))  # 100 pages default
+        self.MAX_FILE_SIZE = 52428800  # 50MB hardcoded limit
+        self.MAX_PAGES = 100  # 100 pages hardcoded limit
+        self.MAX_IMAGES = 20  # limit for image extraction
 
     def validate_pdf(self, file_content: bytes, filename: str) -> Tuple[bool, str]:
         """Validate PDF file"""
@@ -84,7 +84,7 @@ class PDFService:
 
                     # Extract images
                     images = page.images
-                    if images:
+                    if images and len(extracted_data["images"]) < self.MAX_IMAGES:
                         for img_index, img in enumerate(images, 1):
                             # Crop image region
                             cropped = page.crop((img["x0"], img["top"], img["x1"], img["bottom"]))

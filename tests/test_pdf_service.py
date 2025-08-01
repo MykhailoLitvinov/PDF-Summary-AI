@@ -1,25 +1,14 @@
-import os
 from unittest.mock import patch, Mock
 
 from app.services.pdf_service import PDFService
 
 
 class TestPDFService:
-    def test_init_with_default_limits(self):
-        """Test PDFService initialization with default limits"""
-        with patch.dict(os.environ, {}, clear=True):
-            service = PDFService()
-            assert service.MAX_FILE_SIZE == 52428800  # 50MB
-            assert service.MAX_PAGES == 100
-
-    def test_init_with_custom_limits(self, monkeypatch):
-        """Test PDFService initialization with custom limits"""
-        monkeypatch.setenv("PDF_MAX_FILE_SIZE", "10485760")  # 10MB
-        monkeypatch.setenv("PDF_MAX_PAGES", "50")
-
+    def test_init_with_hardcoded_limits(self):
+        """Test PDFService initialization with hardcoded limits"""
         service = PDFService()
-        assert service.MAX_FILE_SIZE == 10485760
-        assert service.MAX_PAGES == 50
+        assert service.MAX_FILE_SIZE == 52428800  # 50MB
+        assert service.MAX_PAGES == 100
 
     def test_validate_pdf_valid_file(self, sample_pdf_bytes):
         """Test PDF validation with valid PDF file"""
@@ -162,3 +151,20 @@ def test_extract_text_dummy_real_file(load_pdf_bytes):
     assert "page_count" in result
     assert "metadata" in result
     assert result["page_count"] > 0
+
+
+def test_extract_content_real_file(load_pdf_bytes):
+    """Integration test with real dummy PDF"""
+    filename = "sample.pdf"
+    pdf_bytes = load_pdf_bytes(filename)
+    service = PDFService()
+
+    result = service.extract_pdf_content(pdf_bytes)
+
+    assert "tables" in result
+    assert "images" in result
+
+    assert len(result["tables"]) > 0
+    assert len(result["images"]) > 0
+
+    assert "base64" in result["images"][0]
